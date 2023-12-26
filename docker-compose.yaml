@@ -1,0 +1,39 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    container_name: backend
+    ports:
+      - "3001:3001"
+
+  frontend:
+    build:
+      context: ./react-odoo-web
+      dockerfile: ./Dockerfile
+    container_name: frontend
+    # ports:
+    #   - "3000:3000"
+    expose:
+        - 3000
+
+  nginx:
+      container_name: nginx
+      restart: unless-stopped
+      image: nginx
+      ports:
+          - 80:80
+          - 443:443
+      volumes:
+          - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+          - ./certbot/conf:/etc/letsencrypt
+          - ./certbot/www:/var/www/certbot
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes: 
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email yunlong.a.liu@gmail.com -d www.yunlong.fi --agree-tos
+
